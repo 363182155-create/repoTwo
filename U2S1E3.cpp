@@ -3,7 +3,7 @@
 
 using namespace std;
 
-int greatestComFactor(int one, int two)
+int gcdOfTwo(int one, int two)
 {
     while (two != 0)
     {
@@ -13,6 +13,7 @@ int greatestComFactor(int one, int two)
     }
     return one;
 }
+
 
 int main()
 {
@@ -24,7 +25,7 @@ int main()
     cout << "Enter another number: " << endl;
     cin >> two;
 
-    cout << "The greatest common factor of " << one << " and " << two << " is " << greatestComFactor(one, two) << endl;
+    cout << "The greatest common divisor of " << one << " and " << two << " is " << gcdOfTwo(one, two) << endl;
     return 0; 
 
 }
