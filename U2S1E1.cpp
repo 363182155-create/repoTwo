@@ -16,6 +16,6 @@ int sumVectors(vector<int> vec)
 int main()
 {
     vector <int> numbers = {1, 2, 3, 4, 5};
-    cout << "The sum of the vector elements is: " << sumVectors(numbers) << endl;
+    cout << "The sum of the vectors are: " << sumVectors(numbers) << endl;
     return 0;
 }
