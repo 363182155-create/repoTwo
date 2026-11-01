@@ -14,7 +14,6 @@ int gcdOfTwo(int one, int two)
     return one;
 }
 
-
 int main()
 {
     int one;
@@ -27,5 +26,4 @@ int main()
 
     cout << "The greatest common divisor of " << one << " and " << two << " is " << gcdOfTwo(one, two) << endl;
     return 0; 
-
 }
