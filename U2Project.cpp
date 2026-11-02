@@ -26,13 +26,13 @@ int main()
     cout << "Welcome to the Battleship Game!" << endl;
 
     cout << "Here is the game board:" << endl;
-    cout << vectorList << endl;
+
 
 //===============================================================
 
-while (boatsFound < numberBoats)
-{
+// while (boatsFound < numberBoats)
+// {
 
-}
+// }
 
 }
