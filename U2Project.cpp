@@ -3,6 +3,10 @@
 
 using namespace std;
 
+const string GREEN = "\033[32m";
+const string RED = "\033[31m";
+const string RESET = "\033[0m";
+
 vector<vector<string>> vectorList = 
 {
     {"A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"},
@@ -17,16 +21,44 @@ vector<vector<string>> vectorList =
     {"J1", "J2", "J3", "J4", "J5", "J6", "J7", "J8", "J9", "J10"}
 };
 
+void printBoard(const vector<vector<string>>& board,
+                const vector<vector<bool>>& hit,
+                const vector<vector<bool>>& miss)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        for (int c = 0; c < 10; c++)
+        {
+            if (hit[i][c])
+            {
+                cout << GREEN << board[i][c] << RESET << " ";
+            }
+            else if (miss[i][c])
+            {
+                cout << RED << board[i][c] << RESET << " ";
+            }
+            else
+            {
+                cout << board[i][c] << " ";
+            }
+        }
+        cout << endl;
+    }
+}
+
 int main()
 {
 
     int boatsFound = 0;
     int guess = 0;
+    int board[10][10] = {0};
+
+    srand(time(0));
 
     cout << "Welcome to the Battleship Game!" << endl;
 
     cout << "Here is the game board:" << endl;
-
+    printBoard(vectorList);
 
 //===============================================================
 
