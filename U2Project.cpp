@@ -58,8 +58,12 @@ int main()
     cout << "Welcome to the Battleship Game!" << endl;
 
     cout << "Here is the game board:" << endl;
-    printBoard(vectorList);
-
+    printBoard(vectorList, 
+        vector<vector<bool>>(10, 
+        vector<bool>(10, false)), 
+        vector<vector<bool>>(10, 
+        vector<bool>(10, false)));
+        
 //===============================================================
 
 // while (boatsFound < numberBoats)
