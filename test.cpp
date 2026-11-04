@@ -135,6 +135,27 @@ void placeRandomBoats(int boatsPlaced, int numberBoats, vector<vector<int>>& boa
 
 //-------------------------------------------------------------------------------
 
+void printBoard(const vector<vector<int>>& boatBoard)
+{
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            if (boatBoard[i][j] == 1)
+            {
+                cout << GREEN << "X " << RESET << " ";
+            }
+            else
+            {
+                cout << battleShipBoard[i][j] << " ";
+            }
+        }
+        cout << endl;
+    }
+}
+
+//-------------------------------------------------------------------------------
+
 int nearbyBoats(int row, int column, const vector<vector<int>>& boatBoard, int spot = 0)
 {
     if (spot == 9)
@@ -220,8 +241,17 @@ int main()
         else
         {
             squares[rowIndex][columnIndex].revealed = true;
-            squares[rowIndex][columnIndex].display = RED + "O " + RESET;
             squares[rowIndex][columnIndex].numberNearbyBoats = nearbyBoats(rowIndex, columnIndex, boatBoard);
+
+            if (squares[rowIndex][columnIndex].numberNearbyBoats > 0)
+            {
+                squares[rowIndex][columnIndex].display = YELLOW + to_string(squares[rowIndex][columnIndex].numberNearbyBoats) + " " + RESET;
+            }
+            else
+            {
+                squares[rowIndex][columnIndex].display = RED + "O " + RESET;
+            }
+
 
             cout << RED << "\nMISS! There was no boat at " << battleShipBoard[rowIndex][columnIndex] << RESET << endl;
             cout << "Boats touching that square: " << YELLOW << squares[rowIndex][columnIndex].numberNearbyBoats << RESET << endl;
@@ -232,6 +262,9 @@ int main()
     }
 
     cout << "\nYou sank all " << numberBoats << " boats! You win!\n";
+
+    cout << "\nBoat Locations Were:\n";
+    printBoard(boatBoard);
 
     return 0;
 }
