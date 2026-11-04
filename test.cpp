@@ -12,10 +12,20 @@ using namespace std;
 const string GREEN = "\033[32m";
 const string RED = "\033[31m";
 const string RESET = "\033[0m";
+const string YELLOW = "\033[33m";
 
 //-------------------------------------------------------------------------------
 
-vector<vector<string>> battleShipBoard = 
+struct Square
+{
+    bool revealed = false; // Indicates whether the square has been revealed (guessed) or not
+    int numberNearbyBoats = 0; //how many boats are touching this square if it is a miss
+    string display = ""; //what gets printed for this square if it is revealed. X for hit, O for miss, or the square name if not revealed.
+};
+
+//-------------------------------------------------------------------------------
+
+vector<vector<string>> battleShipBoard =
 {
     {"A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"},
     {"B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B9", "B10"},
@@ -31,37 +41,63 @@ vector<vector<string>> battleShipBoard =
 
 //-------------------------------------------------------------------------------
 
-void printColoredBoard(const vector<vector<string>>& board,
-                       const vector<vector<bool>>& hit,
-                       const vector<vector<bool>>& miss,
-                       const vector<vector<int>>& nearbyBoatsCount)
+void squareSetup(vector<vector<Square>>& board)
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) // Loop through each row of the board
     {
-        for (int c = 0; c < 10; c++)
+        for (int j = 0; j < 10; j++) // Loop through each column of the board
         {
-            if (hit[i][c])
-            {
-                cout << GREEN << board[i][c] << RESET << " ";
-            }
-            else if (miss[i][c])
-            {
-                cout << RED << nearbyBoatsCount[i][c] << RESET << " ";
-            }
-            else
-            {
-                cout << board[i][c] << " ";
-            }
+            board[i][j].revealed = false; // Initialize the revealed status of each square to false
+            board[i][j].numberNearbyBoats = 0; // Initialize the number of nearby boats for each square to 0
+            board[i][j].display = battleShipBoard[i][j]; // Initialize the display string for each square to its position
         }
-        cout << endl;
     }
 }
 
 //-------------------------------------------------------------------------------
 
+void printBoard(const vector<vector<Square>>& squares) // Function to print the current state of the board
+{
+    for (int i = 0; i < 10; i++) 
+    {
+        for (int j = 0; j < 10; j++)
+        {
+            cout << squares[i][j].display << " "; // Print the display string for each square
+        }
+        cout << endl;
+    }
+}
+
+// void printColoredBoard(const vector<vector<string>>& board,
+//                        const vector<vector<bool>>& hit,
+//                        const vector<vector<bool>>& miss,
+//                        const vector<vector<int>>& nearbyBoatsCount)
+// {
+//     for (int i = 0; i < 10; i++)
+//     {
+//         for (int c = 0; c < 10; c++)
+//         {
+//             if (hit[i][c])
+//             {
+//                 cout << GREEN << board[i][c] << RESET << " ";
+//             }
+//             else if (miss[i][c])
+//             {
+//                 cout << RED << nearbyBoatsCount[i][c] << RESET << " ";
+//             }
+//             else
+//             {
+//                 cout << board[i][c] << " ";
+//             }
+//         }
+//         cout << endl;
+//     }
+// }
+
+//-------------------------------------------------------------------------------
+
 void shipAmount(int& numberBoats)  //let the user select how many ships they want to play with. 1-100. 10 is default.
 {
-    
     cout << "How many ships would you like to play with? (1-100, default is 10): ";
     cin >> numberBoats;
 
@@ -74,7 +110,7 @@ void shipAmount(int& numberBoats)  //let the user select how many ships they wan
 
 //-------------------------------------------------------------------------------
 
-void placeRandomBoats(int boatsPlaced, int numberBoats, vector<vector<bool>>& occupied)
+void placeRandomBoats(int boatsPlaced, int numberBoats, vector<vector<int>>& boatBoard)
 {
     if (boatsPlaced == numberBoats)
     {
@@ -84,40 +120,40 @@ void placeRandomBoats(int boatsPlaced, int numberBoats, vector<vector<bool>>& oc
     int row = rand() % 10;
     int column = rand() % 10;
 
-    if (occupied[row][column])
+    if (boatBoard[row][column] == 1)
     {
-        placeRandomBoats(boatsPlaced, numberBoats, occupied);
+        placeRandomBoats(boatsPlaced, numberBoats, boatBoard);
         return;
     }
 
-    occupied[row][column] = true;
+    boatBoard[row][column] = 1;
     cout << "Boat " << boatsPlaced + 1 << ": "
          << battleShipBoard[row][column] << endl;
 
-    placeRandomBoats(boatsPlaced + 1, numberBoats, occupied);
+    placeRandomBoats(boatsPlaced + 1, numberBoats, boatBoard);
 }
 
 //-------------------------------------------------------------------------------
 
-int nearbyBoats(int row, int column, const vector<vector<bool>>& occupied, int spot = 0)
+int nearbyBoats(int row, int column, const vector<vector<int>>& boatBoard, int spot = 0)
 {
-   if (spot == 9)
+    if (spot == 9)
     {
-          return 0;
+        return 0;
     }
 
-    int rowOffset = row + (spot / 3) - 1; 
-    int colOffset = column + (spot % 3) - 1; 
+    int rowOffset = row + (spot / 3) - 1;
+    int colOffset = column + (spot % 3) - 1;
 
     if (spot != 4 && rowOffset >= 0 && rowOffset < 10 && colOffset >= 0 && colOffset < 10)
     {
-        if (occupied[rowOffset][colOffset])
+        if (boatBoard[rowOffset][colOffset] == 1)
         {
-            return 1 + nearbyBoats(row, column, occupied, spot + 1);
+            return 1 + nearbyBoats(row, column, boatBoard, spot + 1);
         }
     }
 
-    return nearbyBoats(row, column, occupied, spot + 1);
+    return nearbyBoats(row, column, boatBoard, spot + 1);
 }
 
 //-------------------------------------------------------------------------------
@@ -127,28 +163,26 @@ int main()
     char rowInput = '\0';
     int columnInput = 0;
     int boatsFound = 0;
-    int numberBoats = 10; 
-    
+    int numberBoats = 10;
+
     srand(static_cast<unsigned int>(time(0)));
 
-    vector<vector<bool>> occupied(10, vector<bool>(10, false));
-    vector<vector<bool>> hitBoard(10, vector<bool>(10, false));
-    vector<vector<bool>> missBoard(10, vector<bool>(10, false));
-    vector<vector<bool>> guessedBoard(10, vector<bool>(10, false));
-    vector<vector<int>> nearbyBoatsCount(10, vector<int>(10, 0));
+    vector<vector<int>> boatBoard(10, vector<int>(10, 0));
+    vector<vector<Square>> squares(10, vector<Square>(10));
 
 //-------------------------------------------------------------------------------
 
-    shipAmount(numberBoats); 
-    
-    cout << "Battle Ship Board: " << endl;
-    cout << "Random boat placement (" << numberBoats << " boats):" << endl; 
+    shipAmount(numberBoats);
 
-    placeRandomBoats(0, numberBoats, occupied);
+    cout << "Battle Ship Board: " << endl;
+    cout << "Random boat placement (" << numberBoats << " boats):" << endl;
+
+    placeRandomBoats(0, numberBoats, boatBoard);
+    squareSetup(squares);
 
     cout << "\nInitial board:\n";
 
-    printColoredBoard(battleShipBoard, hitBoard, missBoard, nearbyBoatsCount);
+    printBoard(squares);
 
 //-------------------------------------------------------------------------------
 
@@ -168,32 +202,32 @@ int main()
         {
             cout << "Invalid spot. Please enter a row from A-J and a column from 1-10." << endl;
         }
-        else if (guessedBoard[rowIndex][columnIndex])
+        else if (squares[rowIndex][columnIndex].revealed)
         {
             cout << battleShipBoard[rowIndex][columnIndex]
                  << " has already been guessed. Pick a different square.\n";
         }
-        else if (occupied[rowIndex][columnIndex])
+        else if (boatBoard[rowIndex][columnIndex] == 1)
         {
-            guessedBoard[rowIndex][columnIndex] = true;
-            hitBoard[rowIndex][columnIndex] = true;
+            squares[rowIndex][columnIndex].revealed = true;
+            squares[rowIndex][columnIndex].display = GREEN + "X " + RESET;
             boatsFound++;
 
             cout << GREEN << "HIT! You hit " << battleShipBoard[rowIndex][columnIndex] << RESET << endl;
             cout << "\nUpdated board:\n";
-            printColoredBoard(battleShipBoard, hitBoard, missBoard, nearbyBoatsCount);
+            printBoard(squares);
         }
         else
         {
-            guessedBoard[rowIndex][columnIndex] = true;
-            missBoard[rowIndex][columnIndex] = true;
-            nearbyBoatsCount[rowIndex][columnIndex] = nearbyBoats(rowIndex, columnIndex, occupied);
+            squares[rowIndex][columnIndex].revealed = true;
+            squares[rowIndex][columnIndex].display = RED + "O " + RESET;
+            squares[rowIndex][columnIndex].numberNearbyBoats = nearbyBoats(rowIndex, columnIndex, boatBoard);
 
-            cout << RED << "MISS! There was no boat at " << battleShipBoard[rowIndex][columnIndex] << RESET << endl;
-            cout << "Boats touching that square: " << nearbyBoats(rowIndex, columnIndex, occupied) << endl;
+            cout << RED << "\nMISS! There was no boat at " << battleShipBoard[rowIndex][columnIndex] << RESET << endl;
+            cout << "Boats touching that square: " << YELLOW << squares[rowIndex][columnIndex].numberNearbyBoats << RESET << endl;
             cout << "\nUpdated board:\n";
-            
-            printColoredBoard(battleShipBoard, hitBoard, missBoard, nearbyBoatsCount);
+            printBoard(squares);
+
         }
     }
 
@@ -201,47 +235,3 @@ int main()
 
     return 0;
 }
-
-
-//         if (normalizedRow >= 'A' && normalizedRow <= 'J' && columnInput >= 1 && columnInput <= 10)
-//         {
-//             if (guessedBoard[rowIndex][columnIndex])
-//             {
-//                 cout << battleShipBoard[rowIndex][columnIndex]
-//                      << " has already been guessed. Pick a different square.\n";
-//             }
-//             else
-//             {
-//                 guessedBoard[rowIndex][columnIndex] = true;
-
-//                 if (occupied[rowIndex][columnIndex])
-//                 {
-//                     if (!hitBoard[rowIndex][columnIndex])
-//                     {
-//                         hitBoard[rowIndex][columnIndex] = true;
-//                         boatsFound++;
-//                     }
-
-//                     cout << GREEN << "HIT! You hit " << battleShipBoard[rowIndex][columnIndex] << RESET << endl;
-//                 }
-//                 else
-//                 {
-//                     missBoard[rowIndex][columnIndex] = true;
-//                     cout << RED << "MISS! There was no boat at " << battleShipBoard[rowIndex][columnIndex] << RESET << endl;
-//                 }
-
-//                 cout << "\nUpdated board:\n";
-//                 printColoredBoard(battleShipBoard, hitBoard, missBoard, nearbyBoatsCount);
-//             }
-//         }
-//         else
-//         {
-//             cout << "Invalid spot. Please enter a row from A-J and a column from 1-10." << endl;
-//         }
-//     }
-
-//         cout << "\nYou sank all " << numberBoats << " boats! You win!\n";
-
-
-//     return 0;
-// }
