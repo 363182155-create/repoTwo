@@ -25,6 +25,15 @@ struct Square
 
 //-------------------------------------------------------------------------------
 
+struct player
+{
+    vector<vector<Square>> board;
+    vector<vector<Square>> shots;
+    string name;
+};
+
+//-------------------------------------------------------------------------------
+
 vector<vector<string>> battleShipBoard =
 {
     {"A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10"},
@@ -135,6 +144,62 @@ void placeRandomBoats(int boatsPlaced, int numberBoats, vector<vector<int>>& boa
 
 //-------------------------------------------------------------------------------
 
+bool readSquare(int &rowIndex, int &columnIndex)
+{
+    string rowText;
+    string columnText;
+
+    char normalizedRow = toupper(rowText[0]);
+    int columnInput = 0;
+
+    cout << "Enter row (A-J): ";
+    cin >> rowText;
+
+    cout << "Enter column (1-10): ";
+    cin >> columnText;
+
+    if (columnText.length() == 1 && isdigit(columnText[0]))
+    {
+        columnInput = columnText[0] - '0';
+    }
+    else if (columnText == "10")
+    {
+        columnInput = 10;
+    }
+
+    if (rowText.length() != 1 || normalizedRow < 'A' || normalizedRow > 'J' || columnInput < 1 || columnInput > 10)
+    {
+        cout << "Invalid spot sir. Please enter a row from A-J and a column from 1-10." << endl;
+        return false;
+    }
+
+    rowIndex = normalizedRow - 'A';
+    columnIndex = columnInput - 1;
+    return true;
+}
+//-------------------------------------------------------------------------------
+
+// void placeManually(int player, int boatsPlaced, int numberBoats, vector<vector<int>>& boatBoard, vector<vector<Square>>& squares)
+// {
+//     if (boatsPlaced == numberBoats)
+//     {
+//         return;
+//     }
+
+//     cout << "Player " << playerNumber << ", place boat " << boatsPlaced + 1 << " of " << numberBoats << endl;
+
+//     char rowInput;
+//     int columnInput;
+//     bool onBoard = readSquare(rowIndex, columnIndex);
+
+//     if (!onBoard)
+//     {
+//         placeManually(player, boatsPlaced, numberBoats, boatBoard, squares); // ask again
+//     }
+// }
+
+//-------------------------------------------------------------------------------
+
 void printBoard(const vector<vector<int>>& boatBoard)
 {
     for (int i = 0; i < 10; i++)
@@ -152,6 +217,30 @@ void printBoard(const vector<vector<int>>& boatBoard)
         }
         cout << endl;
     }
+}
+
+//-------------------------------------------------------------------------------
+
+void hideScreen() // Pushes the last player's boats off the screen so the other player can't see them
+{
+    for (int i = 0; i < 50; i++)
+    {
+        cout << endl;
+    }
+}
+
+//-------------------------------------------------------------------------------
+
+void singlePlayer()
+{
+
+}
+
+//-------------------------------------------------------------------------------
+
+void twoPlayer()
+{
+
 }
 
 //-------------------------------------------------------------------------------
